@@ -51,8 +51,8 @@
       // We recomend creating a Github app for this as the API is rate limited for non auth apps.
       // More info here: https://developer.github.com/apps/building-oauth-apps/authorization-options-for-oauth-apps/
       async function grabFromGithub(username='octocat') {
-        const clientID = 'client_id=7585fb2113a4db2d34bb';
-        const clientSecret = 'client_secret=3ef5c555d3e5848d606848aea42773e89beff04b';
+        const clientID = 'client_id=<your_client_id>';
+        const clientSecret = 'client_secret=<your_client_secret>';
 
         try {
           let response = await fetch(`https://api.github.com/users/${username}?${clientID}&${clientSecret}`, {
