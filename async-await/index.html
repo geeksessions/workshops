@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible">
+    <title>async/await in the browser</title>
+  </head>
+  <style>
+    body {
+      background-color: coral;
+      font-family: monospace;
+      text-align: center;
+    }
+
+    #loader {
+      margin-top: 20px;
+    }
+  </style>
+  <body>
+    <h1 id="loader">loading...</h1>
+
+    <script>
+      /** 
+       * Kudos! You did async/await in the browser!
+       * Create a web page that does the following:
+       * (1) Start by displaying a loading message
+       * (2) Grab your user information from Github
+       * (3) Slowly show your user avatar and name
+       * (4) After the avatar and name are completely visible...
+       * (5) Display "uses async/await!" text
+       * (6) Pimp it at your will!
+      */
+
+      // Base animation keyframes.
+      const keyframes = [
+        {opacity: 0},
+        {opacity: 1}
+      ];
+
+      // Helper function to return a promise.
+      // The Promise will resolve 'onfinsh' event and reject 'oncancel' event.
+      function animatePromise(animation) {
+        return new Promise((resolve, reject) => {
+          animation.onfinish = resolve;
+          animation.oncancel = reject;
+        });
+      }
+
+      // Grab your user info from Github.
+      // We recomend creating a Github app for this as the API is rate limited for non auth apps.
+      // More info here: https://developer.github.com/apps/building-oauth-apps/authorization-options-for-oauth-apps/
+      async function grabFromGithub(username='octocat') {
+        const clientID = 'client_id=7585fb2113a4db2d34bb';
+        const clientSecret = 'client_secret=3ef5c555d3e5848d606848aea42773e89beff04b';
+
+        try {
+          let response = await fetch(`https://api.github.com/users/${username}?${clientID}&${clientSecret}`, {
+            mode: 'cors'
+          });
+          return await response.json(); 
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Append an <img> tag to <document>.
+      // Use browser's native 'animate' function.
+      // More info: https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
+      async function showUserAvatar(data) {
+        let userAvatarNode = document.createElement('img');
+        
+        userAvatarNode.src = data.avatar_url;
+        document.body.appendChild(userAvatarNode);
+        
+        try {
+          return await animatePromise(
+            userAvatarNode.animate(keyframes, 3000)
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Append an <img> tag to <body>.
+      // This uses the browser's native 'animate' function.
+      // More info: https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
+      async function showUserInfo(data) {
+        let userInfoNode = document.createElement('h2');
+        
+        userInfoNode.textContent = data.name;
+        document.body.appendChild(userInfoNode);
+        
+        try {
+          return await animatePromise(
+            userInfoNode.animate(keyframes, 1000)
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Append a <p> tag to <body>.
+      // This uses the browser's native 'animate' function.
+      // More info: https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
+      async function displayKudos() {
+        let userInfoNode = document.createElement('h1');
+        
+        userInfoNode.style.cssText = 'color: blueviolet;';
+        userInfoNode.textContent = 'Uses async/await!';
+        document.body.appendChild(userInfoNode);
+        
+        try {
+          return await animatePromise(
+            userInfoNode.animate(keyframes, 600)
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // "Chain" all async functions!
+      // Each newly created element starts its animation only after the
+      // animation of the previous one finishes.
+      async function main() {
+        const loader = document.getElementById('loader');
+        const userInfo = await grabFromGithub();
+        
+        loader.remove();
+
+        const userAvatar = await showUserAvatar(userInfo);
+        const userShown = await showUserInfo(userInfo);
+        const kudos = await displayKudos();
+      }
+      
+      // Execute the code!
+      main();
+    </script>
+  </body>
+</html>
